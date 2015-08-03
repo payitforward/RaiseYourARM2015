@@ -1,8 +1,13 @@
-/*
- * Button.h
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	Button.h
+ * @brief	Push button driver
  */
 
 #ifndef BUTTON_BUTTON_H_
@@ -16,7 +21,6 @@ typedef enum
 	BUTTON_LEFT,
 	BUTTON_RIGHT
 } BUTTON_TYPE;
-
 
 extern void Button_init(void);
 extern bool ButtonRegisterCallback(BUTTON_TYPE ButtonSelect, void (*ButtonCallback)());

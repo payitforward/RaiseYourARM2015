@@ -1,8 +1,13 @@
-/*
- * SystemConfig.h
- *
- *  Created on: Jul 15, 2013
- *      Author: Admin
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	SystemConfig.h
+ * @brief	Config system
  */
 
 #ifndef SYSTEMCONFIG_H_

@@ -1,13 +1,19 @@
-/*
- * IR.h
- *
- *  Created on: Jul 4, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *	version 0.0.1
+ */
+
+/**
+ * @file	IR.h
+ * @brief	IR detector
  */
 
 #ifndef IR_H_
 #define IR_H_
 
+/* Public macros ------------------------------------------------------------*/
 #define TURN_ON_IRD1()			ROM_GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0, 0xff)
 #define TURN_OFF_IRD1()			ROM_GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0, 0x00)
 
@@ -23,6 +29,7 @@
 #define TURN_ON_IRD_ALL()		ROM_GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0xff);
 #define TURN_OFF_IRD_ALL()		ROM_GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0x00);
 
+/* Public enum ------------------------------------------------------------*/
 typedef enum
 {
 	IR_CALIB_NONE = 0,

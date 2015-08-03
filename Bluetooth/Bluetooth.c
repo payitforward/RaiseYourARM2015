@@ -1,8 +1,13 @@
-/*
- * Bluetooth.c
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	bluetooth.c
+ * @brief
  */
 
 #include "../include.h"

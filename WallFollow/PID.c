@@ -1,13 +1,18 @@
-/*
- * PID.c
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	PID.c
+ * @brief	PID wall controller
  */
 
 #include "../include.h"
 #include "PID.h"
-
+//* Private variables -------------------------------------------------------*/
 static PID_PARAMETERS pid_parameter;
 
 void pid_init(void)

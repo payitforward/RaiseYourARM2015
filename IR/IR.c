@@ -1,23 +1,32 @@
-/*
- * IR.c
- *
- *  Created on: Jul 4, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *	version 0.0.1
  */
+
+/**
+ * @file	IR.c
+ * @brief	IR detector
+ */
+
 #include "../include.h"
 #include "IR.h"
 
-static uint8_t ADC_Step = 0;
-static IR_CALIB_VALUE ir_calib_values;
-
-static uint32_t IR_Result[4];
+//* Private function prototype ----------------------------------------------*/
 static void IR_Detector_ISR(void);
 static void IR_Timer_Timeout(void);
 static void ir_Stoptimeout(void);
 static TIMER_ID ir_Runtimeout(TIMER_CALLBACK_FUNC TimeoutCallback, uint32_t msTime);
-
+//* Private variables -------------------------------------------------------*/
 static TIMER_ID ir_TimerID = INVALID_TIMER_ID;
+static uint8_t ADC_Step = 0;
+static IR_CALIB_VALUE ir_calib_values;
+static uint32_t IR_Result[4];
 
+/**
+ * @brief IR detector init
+ */
 void IRDetector_init(void)
 {
 	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
@@ -43,6 +52,9 @@ void IRDetector_init(void)
  	ir_Runtimeout(&IR_Timer_Timeout, 1);
 }
 
+/**
+ * @brief IR detector ISR
+ */
 static void IR_Detector_ISR(void)
 {
 	volatile uint32_t ADCResult;
@@ -108,6 +120,10 @@ static void IR_Timer_Timeout(void)
 	ROM_ADCProcessorTrigger(ADC0_BASE, 2);
 }
 
+/**
+ * @brief Get IR detector value
+ * @param Select 0-3
+ */
 uint32_t IR_GetIrDetectorValue(uint8_t Select)
 {
 	if (Select > 3)
@@ -115,6 +131,10 @@ uint32_t IR_GetIrDetectorValue(uint8_t Select)
 	return IR_Result[3 - Select];
 }
 
+/**
+ * @brief Set IR calib
+ * @param Select 0-3
+ */
 bool IR_set_calib_value(IR_CALIB select)
 {
 	switch (select)
@@ -157,6 +177,10 @@ bool IR_set_calib_value(IR_CALIB select)
 	return true;
 }
 
+/**
+ * @brief get IR calib
+ * @param Select 0-3
+ */
 uint32_t IR_get_calib_value(IR_CALIB select)
 {
 	switch (select)

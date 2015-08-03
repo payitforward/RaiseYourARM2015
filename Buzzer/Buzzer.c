@@ -1,30 +1,42 @@
-/*
- * Buzzer.c
- *
- *  Created on: Jul 7, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
  */
+
+/**
+ * @file	Button.h
+ * @brief	Push button driver
+ */
+
 #include "../include.h"
 #include "Buzzer.h"
 
-static void Buzzer_lowbat_notify_handler(void);
+//* Private function prototype ----------------------------------------------*/
+static void buzzer_lowbat_notify_handler(void);
 static void Buzzer_lowbat_shutdown_handler(void);
 static void buzzer_on_timeout_handler(void);
 static void buzzer_Stoptimeout(void);
 static TIMER_ID buzzer_Runtimeout(TIMER_CALLBACK_FUNC TimeoutCallback, uint32_t msTime);
 
+//* Private variables -------------------------------------------------------*/
 static TIMER_ID buzzer_TimerID = INVALID_TIMER_ID;
 
 static const BUZZER_PULSE Lowbat_notify_profile[2] = {
-		{.Freq = 2000, .msTime = 200},
-		{.Freq = 0, .msTime = 3000}
+	{.Freq = 2000, .msTime = 200},
+	{.Freq = 0, .msTime = 3000}
 };
 
 static const BUZZER_PULSE Lowbat_shutdown_profile[2] = {
-		{.Freq = 2000, .msTime = 500},
-		{.Freq = 0, .msTime = 200}
+	{.Freq = 2000, .msTime = 500},
+	{.Freq = 0, .msTime = 200}
 };
 
+//* Function declaration ----------------------------------------------------*/
+/**
+ * @brief Buzzer init
+ */
 void buzzer_init(void)
 {
 	BUZZER_GPIO_PERIPHERAL_ENABLE();
@@ -40,6 +52,9 @@ void buzzer_init(void)
 	ROM_TimerEnable(BUZZER_TIMER, BUZZER_TIMER_CHANNEL);
 }
 
+/**
+ * @brief Set buzzer frequency
+ */
 void buzzer_setsound(uint32_t ulFrequency)
 {
 	uint32_t ulPeriod;
@@ -57,14 +72,20 @@ void buzzer_setsound(uint32_t ulFrequency)
 	}
 }
 
-bool buzzer_low_batterry_notify(void)
+/**
+ * @brief low battery notify
+ */
+bool buzzer_low_battery_notify(void)
 {
 	buzzer_setsound(Lowbat_notify_profile[0].Freq);
-	if (buzzer_Runtimeout(&Buzzer_lowbat_notify_handler, Lowbat_notify_profile[0].msTime) == INVALID_TIMER_ID)
+	if (buzzer_Runtimeout(&buzzer_lowbat_notify_handler, Lowbat_notify_profile[0].msTime) == INVALID_TIMER_ID)
 		return false;
 	return true;
 }
 
+/**
+ * @brief low battery shutdown notify
+ */
 bool buzzer_low_battery_shutdown(void)
 {
 	buzzer_setsound(Lowbat_shutdown_profile[0].Freq);
@@ -73,7 +94,10 @@ bool buzzer_low_battery_shutdown(void)
 	return true;
 }
 
-static void Buzzer_lowbat_notify_handler(void)
+/**
+ * @brief low battery shutdown notify
+ */
+static void buzzer_lowbat_notify_handler(void)
 {
 	static uint8_t step = 0, repeat = 0;
 
@@ -82,14 +106,14 @@ static void Buzzer_lowbat_notify_handler(void)
 	if (step == 0)
 	{
 		buzzer_setsound(Lowbat_notify_profile[1].Freq);
-		buzzer_Runtimeout(&Buzzer_lowbat_notify_handler, Lowbat_notify_profile[1].msTime);
+		buzzer_Runtimeout(&buzzer_lowbat_notify_handler, Lowbat_notify_profile[1].msTime);
 	}
 	else
 	{
 		if (repeat < 20)
 		{
 			buzzer_setsound(Lowbat_notify_profile[0].Freq);
-			buzzer_Runtimeout(&Buzzer_lowbat_notify_handler, Lowbat_notify_profile[0].msTime);
+			buzzer_Runtimeout(&buzzer_lowbat_notify_handler, Lowbat_notify_profile[0].msTime);
 			repeat++;
 		}
 		else
@@ -102,6 +126,9 @@ static void Buzzer_lowbat_notify_handler(void)
 	step %= 2;
 }
 
+/**
+ * @brief low battery shutdown handler
+ */
 static void Buzzer_lowbat_shutdown_handler(void)
 {
 	static uint8_t step = 0, repeat = 0;
@@ -135,6 +162,9 @@ static void Buzzer_lowbat_shutdown_handler(void)
 	step %= 2;
 }
 
+/**
+ * @brief turn on buzzer
+ */
 void buzzer_on(uint32_t Freq, uint32_t msTime)
 {
 	buzzer_setsound(Freq);

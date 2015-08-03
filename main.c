@@ -1,9 +1,22 @@
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	main.c
+ * @brief	main code
+ */
 #include "include.h"
 
 extern volatile float BatteryVoltage;
 static uint8_t IR_Calib_Step = 0;
-static uint32_t IR_vals[4];
 
+/** \brief Button left interrupt handler
+ *
+ */
 void ButtonHandler(void)
 {
 	switch (system_GetState())
@@ -21,17 +34,15 @@ void ButtonHandler(void)
 			system_SetState(SYSTEM_SAVE_CALIB_SENSOR);
 		case SYSTEM_SAVE_CALIB_SENSOR:
 			system_SetState(SYSTEM_ESTIMATE_MOTOR_MODEL);
-//			speed_Enable_Hbridge(true);
-			speed_set(MOTOR_LEFT,500);
-			speed_set(MOTOR_RIGHT, 500);
+			// Motor test
+			speed_set(MOTOR_LEFT, 100);
+			speed_set(MOTOR_RIGHT, -100);
 			break;
 		case SYSTEM_ESTIMATE_MOTOR_MODEL:
-//			system_SetState(SYSTEM_SAVE_MOTOR_MODEL);
 			system_SetState(SYSTEM_WAIT_TO_RUN);
 			speed_Enable_Hbridge(false);
 			break;
 		case SYSTEM_WAIT_TO_RUN:
-//			speed_Enable_Hbridge(true);
 			system_SetState(SYSTEM_RUN_SOLVE_MAZE);
 			break;
 		case SYSTEM_RUN_SOLVE_MAZE:
@@ -44,6 +55,9 @@ void ButtonHandler(void)
 	}
 }
 
+/** \brief Button right interrupt handler
+ *
+ */
 void ButtonRightHandler(void)
 {
 	if (system_GetState() == SYSTEM_CALIB_SENSOR)
@@ -91,9 +105,8 @@ void ButtonRightHandler(void)
 
 void main(void)
 {
-	PID_PARAMETERS pid_param = {.Kp = 1.0, .Kd = 0.0, .Ki = 0.0,
-			.Ts = 20
-	};
+
+	PID_PARAMETERS pid_param = {.Kp = 1.0, .Kd = 0.0, .Ki = 0.0, .Ts = 20};
 
 	system_SetState(SYSTEM_INITIALIZE);
 	Config_System();
@@ -125,10 +138,6 @@ void main(void)
 	while (1)
 	{
 		system_Process_System_State();
-//		IR_vals[0] = IR_GetIrDetectorValue(0);
-//		IR_vals[1] = IR_GetIrDetectorValue(1);
-//		IR_vals[2] = IR_GetIrDetectorValue(2);
-//		IR_vals[3] = IR_GetIrDetectorValue(3);
 	}
 
 }

@@ -1,8 +1,13 @@
-/*
- * Timer.c
- *
- *  Created on: Jul 4, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	timer.c
+ * @brief	timer event managment
  */
 #include <stdint.h>
 #include <stdbool.h>
@@ -18,9 +23,10 @@ typedef struct
   unsigned long period_cnt;
 }TIMEOUT_EVT;
 
-TIMEOUT_EVT timer_event_list[MAX_TIMEOUT_EVT];
-
+//* Private function prototype ----------------------------------------------*/
 void TIMER_ISR(void);
+//* Private variables -------------------------------------------------------*/
+TIMEOUT_EVT timer_event_list[MAX_TIMEOUT_EVT];
 
 void Timer_Init(void)
 {
@@ -37,6 +43,12 @@ void Timer_Init(void)
 	ROM_TimerEnable(TIMER4_BASE, TIMER_A);
 }
 
+/**
+ * @brief Register event
+ * @param callback function name
+ * @param ms event timeout
+ * @return timer ID
+ */
 TIMER_ID TIMER_RegisterEvent(TIMER_CALLBACK_FUNC callback, unsigned long ms)
 {
     int i;

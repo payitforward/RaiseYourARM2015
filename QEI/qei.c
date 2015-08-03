@@ -1,16 +1,23 @@
-/*
- * qei.c
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *	version 0.0.1
+ */
+
+/**
+ * @file	qei.c
+ * @brief	QEI module controller
  */
 
 #include "../include.h"
 #include "qei.h"
 
+//* Private function prototype ----------------------------------------------*/
 static void QEI0_VelocityIsr(void);
 static void QEI1_VelocityIsr(void);
 
+//* Private variables -------------------------------------------------------*/
 static bool qei_velocity_timeout[2];
 static int32_t qei_velocity[2] = {0, 0};
 
@@ -67,6 +74,11 @@ static void QEI1_VelocityIsr(void)
 	qei_velocity_timeout[1] = true;
 }
 
+/**
+ * @brief Get velocity
+ * @param Select 	MOTOR_SELECT_LEFT
+ * 					MOTOR_SELECT_RIGHT
+ */
 bool qei_getVelocity(bool Select, int32_t *Velocity)
 {
 	if (!Select)

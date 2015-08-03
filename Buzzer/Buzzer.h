@@ -1,9 +1,15 @@
-/*
- * Buzzer.h
- *
- *  Created on: Jul 7, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
  */
+
+/**
+ * @file	Buzzer.h
+ * @brief	Battery sense
+ */
+
 
 #ifndef BUZZER_BUZZER_H_
 #define BUZZER_BUZZER_H_
@@ -24,7 +30,7 @@ typedef struct
 
 extern void buzzer_init(void);
 extern void buzzer_setsound(uint32_t ulFrequency);
-extern bool buzzer_low_batterry_notify(void);
+extern bool buzzer_low_battery_notify(void);
 extern bool buzzer_low_battery_shutdown(void);
 extern void buzzer_on(uint32_t Freq, uint32_t msTime);
 

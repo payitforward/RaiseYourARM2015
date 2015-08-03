@@ -1,22 +1,33 @@
-/*
- * WallFollow.c
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
  */
+
+/**
+ * @file	WallFollow.c
+ * @brief	wall follow controller
+ */
+
 
 #include "../include.h"
 #include "WallFollow.h"
 
+//* Private function prototype ----------------------------------------------*/
 static void Pid_process_callback(void);
 static void pid_StopTimeout(void);
 static TIMER_ID pid_Runtimeout(TIMER_CALLBACK_FUNC CallbackFcn, uint32_t msTime);
+//* Private variables -------------------------------------------------------*/
 static WALL_FOLLOW_SELECT e_wall_follow_select = WALL_FOLLOW_NONE;
 static bool ControlFlag = false;
 static uint32_t ui32_msLoop = 0;
-
 static TIMER_ID pid_TimerID = INVALID_TIMER_ID;
 
+/**
+ * @brief Init Wall follow controller
+ * @param pid param
+ */
 void pid_Wallfollow_init(PID_PARAMETERS pid_param)
 {
 	pid_init();
@@ -30,6 +41,9 @@ void pid_Wallfollow_init(PID_PARAMETERS pid_param)
 	ui32_msLoop =  pid_param.Ts;
 }
 
+/**
+ * @brief Wall follow controller
+ */
 static bool pid_wallfollow(float delta_IR_left, float delta_IR_right, float averageSpeed)
 {
 	static float error, u;
@@ -60,6 +74,7 @@ static bool pid_wallfollow(float delta_IR_left, float delta_IR_right, float aver
 	speed_set(MOTOR_LEFT, set_speed[1]);
 	return true;
 }
+
 
 static void Pid_process_callback(void)
 {

@@ -1,13 +1,17 @@
-/*
- * Bluetooth.h
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	bluetooth.c
+ * @brief
  */
 
 #ifndef BLUETOOTH_BLUETOOTH_H_
 #define BLUETOOTH_BLUETOOTH_H_
-
 
 extern void bluetooth_init(uint32_t baudrate);
 extern void bluetooth_send(const uint8_t *pui8Buffer, uint32_t ui32Count);

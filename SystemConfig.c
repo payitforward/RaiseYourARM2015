@@ -1,16 +1,22 @@
-/*
- * SystemConfig.c
- *
- *  Created on: Jul 15, 2013
- *      Author: Admin
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	SystemConfig.c
+ * @brief	System config
  */
 #include "include.h"
 #include "inc/hw_gpio.h"
 #include "driverlib/systick.h"
 
+//* Private function prototype ----------------------------------------------*/
 static void SysTickIntHandle(void);
 static void system_SystickConfig(uint32_t ui32_msInterval);
-
+//* Private variables -------------------------------------------------------*/
 static SYSTEM_STATE e_SystemState = SYSTEM_POWER_UP;
 static uint32_t ms_Tickcount = 0;
 

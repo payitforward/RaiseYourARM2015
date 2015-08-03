@@ -1,25 +1,31 @@
-/*
- * speed_control.c
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *	version 0.0.1
+ */
+
+/**
+ * @file	speed control.c
+ * @brief	speed control
  */
 
 #include "../include.h"
 #include "speed_control.h"
 
+//* Private function prototype ----------------------------------------------*/
+static void Config_PWM(void);
+static void SetPWM(uint32_t ulBaseAddr, uint32_t ulTimer, uint32_t ulFrequency, int32_t ucDutyCycle);
+static void speed_update_setpoint(void);
+static void speed_control_runtimeout(uint32_t ms);
+static void speed_control_stoptimeout(void);
+//* Private variables -------------------------------------------------------*/
 static real_T Theta[4], Theta_[4] = {-1, 1, 1, 1};
 static real_T Theta2[4], Theta2_[4] = {-1, 1, 1, 1};
 static int32_t SetPoint[2] = {0, 0};
 static int32_t RealSpeedSet[2] = {0, 0};
 static float udk = 0;
 static TIMER_ID speed_control_timID = INVALID_TIMER_ID;
-
-static void Config_PWM(void);
-static void SetPWM(uint32_t ulBaseAddr, uint32_t ulTimer, uint32_t ulFrequency, int32_t ucDutyCycle);
-static void speed_update_setpoint(void);
-static void speed_control_runtimeout(uint32_t ms);
-static void speed_control_stoptimeout(void);
 
 void speed_control_init(void)
 {
@@ -29,6 +35,10 @@ void speed_control_init(void)
 	SetPWM(PWM_MOTOR_RIGHT, DEFAULT, 0);
 }
 
+/**
+ * @brief Init battery sense
+ * @note this function must call to calculate speed control
+ */
 void ProcessSpeedControl(void)
 {
 	int32_t Velocity[2];
@@ -83,6 +93,9 @@ static void Config_PWM(void)
 	ROM_GPIOPinWrite(DRV_ENABLE_RIGHT_CHN_PORT, DRV_ENABLE_RIGHT_CHN_PIN, 0);
 }
 
+/**
+ * @brief Control Hbridge
+ */
 void speed_Enable_Hbridge(bool Enable)
 {
 	if (Enable)
@@ -109,6 +122,11 @@ void SetPWM(uint32_t ulBaseAddr, uint32_t ulTimer, uint32_t ulFrequency, int32_t
 	ROM_TimerMatchSet(ulBaseAddr, ulTimer, (100 + ucDutyCycle) * ulPeriod / 200 - 1);
 }
 
+/**
+ * @brief Control speed
+ * @param select motor select
+ * @param speed motor speed (encoder pulse / 20ms)
+ */
 void speed_set(MOTOR_SELECT Select, int32_t speed)
 {
 	if (Select == MOTOR_RIGHT)
@@ -121,6 +139,7 @@ void speed_set(MOTOR_SELECT Select, int32_t speed)
 	}
 	speed_control_runtimeout(20);
 }
+
 
 static void speed_update_setpoint(void)
 {

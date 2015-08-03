@@ -1,9 +1,15 @@
-/*
- * PID.h
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
  */
+
+/**
+ * @file	PID.h
+ * @brief	PID wall controller
+ */
+
 
 #ifndef WALLFOLLOW_PID_H_
 #define WALLFOLLOW_PID_H_

@@ -1,23 +1,33 @@
-/*
- * Button.c
- *
- *  Created on: Jul 6, 2015
- *      Author: NHH
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
+ */
+
+/**
+ * @file	Button.c
+ * @brief	Push button driver
  */
 
 #include "../include.h"
 #include "Button.h"
 
+//* Private function prototype ----------------------------------------------*/
 static void ButtonsISR(void);
 static void (*Button_right_callback)(), (*Button_left_callback)();
 static void ButtonDebounceCallback(void);
 static void button_Stoptimeout(void);
 static void button_Runtimeout(TIMER_CALLBACK_FUNC TimeoutCallback, uint32_t msTime);
 
-
+//* Private variables -------------------------------------------------------*/
 static uint8_t Button_pressed = 0;
 static TIMER_ID button_TimerID = INVALID_TIMER_ID;
 
+//* Function declaration ----------------------------------------------------*/
+/**
+ * @brief Button init
+ */
 void Button_init(void)
 {
 	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
@@ -34,6 +44,12 @@ void Button_init(void)
 	GPIOIntClear(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);
 }
 
+/**
+ * @brief Register button callback
+ * @param ButtonSelect button
+ * @param ButtonCallBack pointer to callback function
+ * @return registry state
+ */
 bool ButtonRegisterCallback(BUTTON_TYPE ButtonSelect, void (*ButtonCallback)())
 {
 	if (ButtonSelect == BUTTON_RIGHT)
@@ -49,6 +65,9 @@ bool ButtonRegisterCallback(BUTTON_TYPE ButtonSelect, void (*ButtonCallback)())
 	return false;
 }
 
+/**
+ * @brief Button isr
+ */
 static void ButtonsISR(void)
 {
 	uint32_t ui32_IntStatus;
@@ -66,6 +85,9 @@ static void ButtonsISR(void)
 	button_Runtimeout(&ButtonDebounceCallback, BUTTON_DEBOUNCE_MS);
 }
 
+/**
+ * @brief Button debounce
+ */
 static void ButtonDebounceCallback(void)
 {
 	button_TimerID = INVALID_TIMER_ID;
