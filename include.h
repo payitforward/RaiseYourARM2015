@@ -47,5 +47,7 @@
 #include "WallFollow/WallFollow.h"
 #include "Buzzer/Buzzer.h"
 #include "Battery/Battery.h"
-
+#include "HostComm/HostComm.h"
+#include "ImgProcess/ImgProcess.h"
+#include "Manual/manual.h"
 #endif /* INCLUDE_H_ */

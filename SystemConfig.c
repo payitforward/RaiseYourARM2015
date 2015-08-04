@@ -107,6 +107,8 @@ void system_Process_System_State(void)
 			ProcessSpeedControl();
 			break;
 		case SYSTEM_RUN_IMAGE_PROCESSING:
+			LED1_ON();
+			manualTask();
 			ProcessSpeedControl();
 			break;
 		case SYSTEM_ERROR:

@@ -129,15 +129,27 @@ void SetPWM(uint32_t ulBaseAddr, uint32_t ulTimer, uint32_t ulFrequency, int32_t
  */
 void speed_set(MOTOR_SELECT Select, int32_t speed)
 {
+	speed_Enable_Hbridge(true);
 	if (Select == MOTOR_RIGHT)
 	{
-		SetPoint[0] = speed;
+		if (SetPoint[0] != speed)
+		{
+			SetPoint[0] = speed;
+			speed_control_runtimeout(20);
+		}
 	}
 	else if (Select == MOTOR_LEFT)
 	{
-		SetPoint[1] = speed;
+		if (SetPoint[1] != speed)
+		{
+			SetPoint[1] = speed;
+			speed_control_runtimeout(20);
+		}
 	}
-	speed_control_runtimeout(20);
+	if (SetPoint[0]==0 && SetPoint[1]==0 )
+	{
+		speed_Enable_Hbridge(false);
+	}
 }
 
 

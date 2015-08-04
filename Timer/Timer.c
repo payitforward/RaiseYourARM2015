@@ -26,7 +26,7 @@ typedef struct
 //* Private function prototype ----------------------------------------------*/
 void TIMER_ISR(void);
 //* Private variables -------------------------------------------------------*/
-TIMEOUT_EVT timer_event_list[MAX_TIMEOUT_EVT];
+static TIMEOUT_EVT timer_event_list[MAX_TIMEOUT_EVT];
 
 void Timer_Init(void)
 {

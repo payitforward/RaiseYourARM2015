@@ -37,13 +37,15 @@ void ButtonHandler(void)
 			// Motor test
 			speed_set(MOTOR_LEFT, 100);
 			speed_set(MOTOR_RIGHT, -100);
+			speed_Enable_Hbridge(true);
 			break;
 		case SYSTEM_ESTIMATE_MOTOR_MODEL:
 			system_SetState(SYSTEM_WAIT_TO_RUN);
-			speed_Enable_Hbridge(false);
 			break;
 		case SYSTEM_WAIT_TO_RUN:
-			system_SetState(SYSTEM_RUN_SOLVE_MAZE);
+			system_SetState(SYSTEM_RUN_IMAGE_PROCESSING);
+			speed_Enable_Hbridge(true);
+//			speed_control_runtimeout(20);
 			break;
 		case SYSTEM_RUN_SOLVE_MAZE:
 		case SYSTEM_RUN_IMAGE_PROCESSING:
@@ -134,7 +136,8 @@ void main(void)
 //	bluetooth_print("AT+NAME=NHH\r\n");
 //	bluetooth_print("AT+PSWD=3393\r\n");
 //	bluetooth_print("AT+UART=115200,0,0\r\n");
-	pid_Wallfollow_set_follow(WALL_FOLLOW_RIGHT);
+//	pid_Wallfollow_set_follow(WALL_FOLLOW_RIGHT);
+
 	while (1)
 	{
 		system_Process_System_State();

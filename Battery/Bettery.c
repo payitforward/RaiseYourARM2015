@@ -62,7 +62,7 @@ void BattSenseISR(void)
 	ROM_ADCIntClear(ADC1_BASE, 3);
 	battery_Runtimeout(&BattSenseTimerTimeout, 10000);
 	ROM_ADCSequenceDataGet(ADC1_BASE, 3, (uint32_t *)&ADCResult);
-	BatteryVoltage = ((float)ADCResult) / 4096 * 3.3 * (100 + 470) / 100;
+	BatteryVoltage = ((float)ADCResult) / 4096 * 3.3 * (100 + 470) / 100 + 0.3;
 
 	if (BatteryVoltage < (float)7.6)
 	{

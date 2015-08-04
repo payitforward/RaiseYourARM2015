@@ -45,6 +45,7 @@ void bluetooth_init(uint32_t baudrate)
 
 static void Bluetooth_RxHandler(void)
 {
+	uint8_t c;
     ROM_UARTIntClear(UART0_BASE, ROM_UARTIntStatus(UART0_BASE, true));
 
     while (ROM_UARTCharsAvail(UART0_BASE))
@@ -52,13 +53,17 @@ static void Bluetooth_RxHandler(void)
         if (rxHead + 1 < MAX_RX_BUF)
         {
           if((rxHead + 1) != rxTail){
-               rxBuffer[rxHead++] = ROM_UARTCharGet(UART0_BASE);
+        	  c= ROM_UARTCharGet(UART0_BASE);
+        	  manualRecv(c);
+               rxBuffer[rxHead++] = c;
           }
         }
         else
         {
           if(0 != rxTail){
-            rxBuffer[rxHead] = ROM_UARTCharGet(UART0_BASE);
+        	  c= ROM_UARTCharGet(UART0_BASE);
+        	  manualRecv(c);
+            rxBuffer[rxHead] = c;
             rxHead = 0;
           }
         }
