@@ -102,3 +102,20 @@ bool qei_getVelocity(bool Select, int32_t *Velocity)
 		else
 			return false;
 }
+
+int32_t qei_getPosLeft()
+{
+	return ROM_QEIPositionGet(QEI1_BASE);
+}
+int32_t qei_getPosRight()
+{
+	return ROM_QEIPositionGet(QEI0_BASE);
+}
+void qei_setPosLeft(int32_t pos)
+{
+	ROM_QEIPositionSet(QEI1_BASE,pos);
+}
+void qei_setPosRight(int32_t pos)
+{
+	ROM_QEIPositionSet(QEI0_BASE,pos);
+}

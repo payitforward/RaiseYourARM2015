@@ -3,4 +3,5 @@
 
 void imageProcessInit();
 void imageProcessTask();
+void imgProcessRecv(uint8_t c);
 #endif

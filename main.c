@@ -43,14 +43,16 @@ void ButtonHandler(void)
 			system_SetState(SYSTEM_WAIT_TO_RUN);
 			break;
 		case SYSTEM_WAIT_TO_RUN:
+			speed_set(MOTOR_LEFT, 0);
+			speed_set(MOTOR_RIGHT, 0);
 			system_SetState(SYSTEM_RUN_IMAGE_PROCESSING);
 			speed_Enable_Hbridge(true);
 //			speed_control_runtimeout(20);
 			break;
 		case SYSTEM_RUN_SOLVE_MAZE:
 		case SYSTEM_RUN_IMAGE_PROCESSING:
-			system_SetState(SYSTEM_WAIT_TO_RUN);
-			speed_Enable_Hbridge(false);
+//			system_SetState(SYSTEM_WAIT_TO_RUN);
+//			speed_Enable_Hbridge(false);
 			break;
 		default:
 			break;

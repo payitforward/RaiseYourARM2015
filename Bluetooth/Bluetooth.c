@@ -55,19 +55,41 @@ static void Bluetooth_RxHandler(void)
           if((rxHead + 1) != rxTail){
         	  c= ROM_UARTCharGet(UART0_BASE);
         	  manualRecv(c);
-               rxBuffer[rxHead++] = c;
+        	  imgProcessRecv(c);
+              rxBuffer[rxHead++] = c;
           }
         }
         else
         {
-          if(0 != rxTail){
+          if(0 != rxTail)
+          {
         	  c= ROM_UARTCharGet(UART0_BASE);
         	  manualRecv(c);
-            rxBuffer[rxHead] = c;
-            rxHead = 0;
+        	  imgProcessRecv(c);
+        	  rxBuffer[rxHead] = c;
+        	  rxHead = 0;
           }
         }
     }
+}
+uint16_t bluetooth_recv_all(uint8_t *rxBuf)
+{
+	uint16_t len=0;
+	while(rxTail != rxHead)
+	{
+		if (rxTail  + 1 < MAX_RX_BUF)
+		{
+			*rxBuf++ = rxBuffer[rxTail++];
+			len++;
+		}
+		else
+		{
+			*rxBuf++ = rxBuffer[rxTail];
+			rxTail = 0;
+			len++;
+		}
+	}
+	return len;
 }
 
 uint16_t bluetooth_recv(uint8_t* rxBuf, uint16_t numToRead, bool block)
