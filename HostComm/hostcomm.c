@@ -1,51 +1,51 @@
-/*
- * HostComm.c
- *
- *  Created on: Jul 14, 2015
- *      Author: Huan
+/**
+ *	Raise your ARM 2015 sample code http://raiseyourarm.com/
+ *	Author: Pay it forward club
+ *	http://www.payitforward.edu.vn
+ *  version 0.0.1
  */
 
 #include "../include.h"
 
-#define START_BYTE 0xFF
-#define UPDATE_TIME_MS 50
-#define MAX_MSG_LEN_BYTE 20
-
-#define SET_PID_PARAMS_CMD 1
-#define SET_MAZE_ALGORITHM_CMD 2
-
-#define PID_PARAMS_SCALE 100000000
-
-extern uint8_t IR_Calib_Step;
-
-static TIMER_ID HostComm_TimerID = INVALID_TIMER_ID;
-static bool HostCommFlag = false;
-
-static int32_t batteryVoltage;
-static SYSTEM_STATE state;
-
-static int32_t rcvMsgByte=0;
-static uint8_t rcvMsg[MAX_MSG_LEN_BYTE];
-static int32_t rcvMsgLen=0;
-
-static uint8_t data[MAX_MSG_LEN_BYTE];
-static int32_t len;
-
-static void HostCommTimeoutCallBack(void)
+#define MAX_HANDLER_EVT 10
+typedef struct
 {
-	HostComm_TimerID = INVALID_TIMER_ID;
-	HostCommFlag = true;
-	if (HostComm_TimerID != INVALID_TIMER_ID)
-		TIMER_UnregisterEvent(HostComm_TimerID);
-	HostComm_TimerID = TIMER_RegisterEvent(&HostCommTimeoutCallBack, UPDATE_TIME_MS);
+  HOSTCOMM_CALLBACK_FUNC callback;
+  uint8_t code;
+}HOSTCOMM_EVT;
+uint16_t HostCommCalCheckSum(uint8_t *data, uint16_t len);
+void HostComm_HandleRxData(unsigned char *ptr, unsigned long len);
+void HostComm_CallHandler();
+void HostComm_HandleBluetoothEvent();
+
+static unsigned char HostComm_RxBuf[MAX_HOSTCOMM_RX_BUF_SIZE];
+static unsigned char HostComm_TxBuf[MAX_HOSTCOMM_TX_BUF_SIZE];
+static uint32_t txHead, rxHead;
+static uint32_t txTail, rxTail;
+static HOSTCOMM_EVT hostcom_event_list[MAX_HANDLER_EVT];
+static uint32_t rxFrameStart, rxFrameEnd;
+static bool HostComm_HC05_Timer_IsTimeout = false;
+uint32_t recvGetBuff[];
+uint16_t HostComm_calcCheckSum(uint8_t *data, uint8_t len)
+{
+    uint16_t sum=0;
+    int i;
+    for (i=0; i<len; i++)
+    {
+        sum+=data[i];
+    }
+    return sum;
 }
+
 void HostCommInit()
 {
+	int i;
 	bluetooth_init(115200);
-	if (HostComm_TimerID != INVALID_TIMER_ID)
-		TIMER_UnregisterEvent(HostComm_TimerID);
-	HostComm_TimerID = TIMER_RegisterEvent(&HostCommTimeoutCallBack, UPDATE_TIME_MS);
-
+	HC05_RegisterEvtNotify(&HostComm_HandleBluetoothEvent);
+    for(i=0; i< MAX_HANDLER_EVT; i++)
+    {
+    	hostcom_event_list[i].code=0xFF;
+    }
 }
 
 uint16_t HostCommCalCheckSum(uint8_t *data, uint16_t len)
@@ -58,128 +58,109 @@ uint16_t HostCommCalCheckSum(uint8_t *data, uint16_t len)
 	return sum;
 }
 
-//void HostComm_process(void)
-//{
-//	if (HostCommFlag)
-//	{
-//		//LED1_TOGGLE();
-//		HostCommFlag = false;
-//
-//		//SENDING: sending frame=1 START BYTE + 4 BATT_VOLT BYTES + 1 STATE BYTE + N DATA BYTES
-//		data[0]=START_BYTE;
-//
-//		batteryVoltage =  (int32_t)(GetBatteryVoltage()*100);
-//		data[2]=batteryVoltage>>24;
-//		data[3]=batteryVoltage>>16;
-//		data[4]=batteryVoltage>>8;
-//		data[5]=batteryVoltage;
-//
-//		state = system_GetState();
-//		data[6]=state;
-//		switch(state)
-//		{
-//		case SYSTEM_CALIB_SENSOR:
-//		{
-//			data[7]= IR_Calib_Step;
-//			len=8;
-//			break;
-//		}
-//		case SYSTEM_RUN_SOLVE_MAZE:
-//		{
-//			int32_t PIDError;
-//			WALL_FOLLOW_SELECT wallFollowSel;
-//			wallFollowSel = Get_Pid_Wallfollow();
-//			data[7]=(uint8_t)wallFollowSel;
-//			PIDError = (int32_t)pid_get_error();
-//			data[8]=PIDError>>24;
-//			data[9]=PIDError>>16;
-//			data[10]=PIDError>>8;
-//			data[11]=PIDError;
-//			len=12;
-//			break;
-//		}
-//		default:
-//		{
-//			len=7;
-//		}
-//		}
-//		//data[len++]='\n';
-//		data[1]=len;
-//		bluetooth_send(data,len);
-//
-//
-//		//RECEIVING: rcv frame= 1 START BYTE + 1 CMD_ID BYTE + N DATA BYTES
-//		len=bluetooth_recv(data,MAX_MSG_LEN_BYTE,false);
-//		if (len)
-//		{
-//
-//			int i;
-//			for (i=0;i<len;i++)
-//			{
-//				if (rcvMsgByte==0)
-//				{
-//					if (data[i]==START_BYTE)
-//					{
-//						rcvMsg[rcvMsgByte++] = data[i];
-//
-//					}
-//					continue;
-//				}
-//				rcvMsg[rcvMsgByte++] = data[i];
-//
-//				if (rcvMsgByte==2)
-//				{
-//					switch (rcvMsg[1])
-//					{
-//					case SET_PID_PARAMS_CMD:
-//					{
-//						rcvMsgLen = 14;//N=12 (4 bytes Kp + 4 bytes Ki + 4 bytes Kd)
-//
-//						break;
-//					}
-//					case SET_MAZE_ALGORITHM_CMD://N=1
-//					{
-//						rcvMsgLen = 3;
-//						break;
-//					}
-//					default:
-//						rcvMsgByte = 0;
-//					}
-//				}
-//
-//				if ((rcvMsgByte==rcvMsgLen) && (rcvMsgLen != 0))
-//				{
-//					rcvMsgByte = 0;
-//
-//					switch (rcvMsg[1])
-//					{
-//					case SET_PID_PARAMS_CMD:
-//					{
-//						//float Kp,Ki,Kd;
-//						//Kp=(rcvMsg[0]<<24|rcvMsg[1]<<16|rcvMsg[2]<<8|rcvMsg[3])*1.0/1000000000;
-//						//Ki=(rcvMsg[4]<<24|rcvMsg[5]<<16|rcvMsg[6]<<8|rcvMsg[7])*1.0/1000000000;
-//						//Kd=(rcvMsg[8]<<24|rcvMsg[9]<<16|rcvMsg[10]<<8|rcvMsg[11])*1.0/1000000000;
-//						//pid_set_k_params(Kp,Ki,Kd);
-//					    uint32_t Kp,Ki,Kd;
-//						Kp=(rcvMsg[2]<<24|rcvMsg[3]<<16|rcvMsg[4]<<8|rcvMsg[5]);
-//						Ki=(rcvMsg[6]<<24|rcvMsg[7]<<16|rcvMsg[8]<<8|rcvMsg[9]);
-//						Kd=(rcvMsg[10]<<24|rcvMsg[11]<<16|rcvMsg[12]<<8|rcvMsg[13]);
-//
-//						//bluetooth_print("K %d %d %d\n",Kp,Ki,Kd);
-//						pid_set_k_params((float)Kp/PID_PARAMS_SCALE,
-//								(float)Ki/PID_PARAMS_SCALE,
-//								(float)Kd/PID_PARAMS_SCALE);
-//						break;
-//					}
-//					case SET_MAZE_ALGORITHM_CMD://N=1
-//					{
-//						pid_Wallfollow_set_follow((WALL_FOLLOW_SELECT)rcvMsg[2]);
-//						break;
-//					}
-//					}
-//
-//				}
-//			}
-//		}
-//	}
-//}
+void HostComm_HandleBluetoothEvent(void)
+{
+  HC05_SYSTEM_INFO_TYPES InfoType;
+  HC05_SYSTEM_INFO_ID InfoId;
+	static uint16_t datalen;
+
+  InfoType = HC05_GetSystemInfoType();
+  InfoId = HC05_GetSystemInfoID();
+
+  if(InfoType == HC05_OPERATION_ERROR)
+  {
+
+  }
+
+  switch(InfoId)
+  {
+    case HC05_RX_AVAILABLE:			//there is Rx data
+		HC05_QueryRxData();
+    break;
+    case HC05_READ_DONE:			//done TCP reading
+		datalen = HC05_GetRxSize();
+		HC05_GetRxData(HostComm_RxBuf, datalen);
+		HostComm_HandleRxData(HostComm_RxBuf, datalen);
+    break;
+    case HC05_WRITE_DONE:			//done TCP writing
+    break;
+    default: break;
+  }
+}
+
+void HostComm_HandleRxData(unsigned char *ptr, unsigned long buffLen)
+{
+	int i,j;
+	uint16_t len;
+	for (i=0;i<buffLen;i++)
+	{
+		HostComm_RxBuf[rxTail++]=ptr[i];
+		rxTail %= MAX_HOSTCOMM_RX_BUF_SIZE;
+	}
+	for (i=rxHead;i!=rxTail;i=(i+1)%MAX_HOSTCOMM_RX_BUF_SIZE)
+	{
+		if (HostComm_RxBuf[i]==HOSTCOMM_MSG_START_CODE)
+		{
+            len = HostComm_RxBuf[i+1];
+            len |= HostComm_RxBuf[i+2]<<8;
+            if (HostComm_RxBuf[i+2+len+3]==HOSTCOMM_MSG_END_CODE)
+            {
+                uint16_t crc = HostComm_RxBuf[i+len+3];
+                crc |= HostComm_RxBuf[i+len+4]<<8;
+                if (HostCommCalCheckSum(&HostComm_RxBuf[i+3],len)==crc)
+                {
+                	rxFrameStart = i+3;
+                	rxFrameEnd = i+2+len;
+                	rxHead=rxFrameEnd+4;
+                	// Call handler
+                	for (j=0 ; j<MAX_HANDLER_EVT;j++)
+                	{
+                		if (hostcom_event_list[i].code==HostComm_RxBuf[rxFrameStart])
+                		{
+                			(hostcom_event_list[i].callback)(HostComm_RxBuf+rxFrameStart,len);
+                		}
+                	}
+                    break;
+                }
+            }
+		}
+	}
+}
+
+Callback_ID HostCommHandlerRegister(HOSTCOMM_CALLBACK_FUNC callback,MSGCODE code)
+{
+    int i;
+    for(i=0; i< MAX_HANDLER_EVT; i++)
+    {
+      if((hostcom_event_list[i].code == 0xFF) && (hostcom_event_list[i].callback == NULL)) break;
+    }
+    if(i == MAX_HANDLER_EVT)
+    	return INVALID_HANDLER_ID;
+
+    hostcom_event_list[i].code = code;
+    hostcom_event_list[i].callback = callback;
+
+    return (Callback_ID)i;
+}
+
+bool HostCommHandlerUnregister(Callback_ID id)
+{
+	bool ret = false;
+    if(id < MAX_HANDLER_EVT)
+    {
+    	hostcom_event_list[id].code = 0xFF;
+    	hostcom_event_list[id].callback = NULL;
+        ret = true;
+    }
+    return ret;
+}
+
+void HostComm_EventProcessing(void)
+{
+	HC05_EventProcessing();
+	if (HostComm_HC05_Timer_IsTimeout == true)
+	{
+
+		HostComm_HC05_Timer_IsTimeout = false;
+	}
+}
