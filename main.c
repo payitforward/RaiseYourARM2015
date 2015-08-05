@@ -10,49 +10,70 @@
  * @brief	main code
  */
 #include "include.h"
+extern void SetPWM(uint32_t ulBaseAddr, uint32_t ulTimer, uint32_t ulFrequency, int32_t ucDutyCycle);
 
 extern volatile float BatteryVoltage;
-static uint8_t IR_Calib_Step = 0;
+uint8_t IR_Calib_Step = 0;
 
 /** \brief Button left interrupt handler
  *
  */
-void ButtonHandler(void)
+void ButtonLeftHandler(void)
 {
 	switch (system_GetState())
 	{
 		case SYSTEM_INITIALIZE:
 			speed_Enable_Hbridge(false);
-			system_SetState(SYSTEM_CALIB_SENSOR);
-			IR_Calib_Step = 0;
-			LED1_ON();
-			LED2_ON();
-			LED3_ON();
+			if (SW1_ON)
+			{
+				system_SetState(SYSTEM_CALIB_SENSOR);
+				IR_Calib_Step = 0;
+			}
+			else
+			{
+
+				loadIRData();
+				system_SetState(SYSTEM_GET_MOTOR_MODEL);
+			}
+
 			break;
 		case SYSTEM_CALIB_SENSOR:
 			speed_Enable_Hbridge(false);
-			system_SetState(SYSTEM_SAVE_CALIB_SENSOR);
-		case SYSTEM_SAVE_CALIB_SENSOR:
-			system_SetState(SYSTEM_ESTIMATE_MOTOR_MODEL);
-			// Motor test
-			speed_set(MOTOR_LEFT, 100);
-			speed_set(MOTOR_RIGHT, -100);
-			speed_Enable_Hbridge(true);
+			saveIRData();
+			system_SetState(SYSTEM_GET_MOTOR_MODEL);
+			break;
+
+		case SYSTEM_GET_MOTOR_MODEL:
+			if (SW2_ON)
+			{
+				system_SetState(SYSTEM_ESTIMATE_MOTOR_MODEL);
+				speed_Enable_Hbridge(true);
+				speed_set(MOTOR_LEFT,200);
+				speed_set(MOTOR_RIGHT,200);
+			}
+			else
+			{
+				loadMotorModel();
+				system_SetState(SYSTEM_WAIT_TO_RUN);
+			}
 			break;
 		case SYSTEM_ESTIMATE_MOTOR_MODEL:
+			speed_Enable_Hbridge(false);
+			system_SetState(SYSTEM_SAVE_MOTOR_MODEL);
+			break;
+		case SYSTEM_SAVE_MOTOR_MODEL:
+			saveMotorModel();
 			system_SetState(SYSTEM_WAIT_TO_RUN);
 			break;
 		case SYSTEM_WAIT_TO_RUN:
-			speed_set(MOTOR_LEFT, 0);
-			speed_set(MOTOR_RIGHT, 0);
-			system_SetState(SYSTEM_RUN_IMAGE_PROCESSING);
-			speed_Enable_Hbridge(true);
-//			speed_control_runtimeout(20);
-			break;
+			SysCtlDelay(SysCtlClockGet()/3);
+			system_SetState(SYSTEM_RUN_SOLVE_MAZE);
+			qei_setPosLeft(0);
+			qei_setPosRight(0);
 		case SYSTEM_RUN_SOLVE_MAZE:
 		case SYSTEM_RUN_IMAGE_PROCESSING:
-//			system_SetState(SYSTEM_WAIT_TO_RUN);
-//			speed_Enable_Hbridge(false);
+			speed_Enable_Hbridge(true);
+
 			break;
 		default:
 			break;
@@ -73,59 +94,67 @@ void ButtonRightHandler(void)
 				LED2_OFF();
 				LED3_OFF();
 				IR_set_calib_value(IR_CALIB_BASE_LEFT);
-				IR_set_calib_value(IR_CALIB_BASE_RIGHT);
 				break;
 			case 1:
+				IR_set_calib_value(IR_CALIB_BASE_RIGHT);
+				break;
+			case 2:
 				IR_set_calib_value(IR_CALIB_BASE_FRONT_LEFT);
 				IR_set_calib_value(IR_CALIB_BASE_FRONT_RIGHT);
 				LED1_OFF();
 				LED2_ON();
 				LED3_OFF();
 				break;
-			case 2:
+			case 3:
 				IR_set_calib_value(IR_CALIB_MAX_LEFT);
 				LED1_ON();
 				LED2_ON();
 				LED3_OFF();
 				break;
-			case 3:
+			case 4:
 				IR_set_calib_value(IR_CALIB_MAX_RIGHT);
 				LED1_OFF();
 				LED2_OFF();
 				LED3_ON();
 				break;
-			case 4:
+			case 5:
+				IR_set_calib_value(IR_CALIB_MAX_RIGHT);
+				LED1_ON();
+				LED2_ON();
+				LED3_OFF();
+				break;
+			case 6:
 				IR_set_calib_value(IR_CALIB_MAX_FRONT_LEFT);
 				IR_set_calib_value(IR_CALIB_MAX_FRONT_RIGHT);
-				LED1_ON();
+				LED1_OFF();
 				LED2_OFF();
-				LED3_ON();
+				LED3_OFF();
 				break;
 		}
 		IR_Calib_Step++;
-		IR_Calib_Step %= 4;
+		IR_Calib_Step %= 6;
 	}
 }
 
-void main(void)
-{
-
-	PID_PARAMETERS pid_param = {.Kp = 1.0, .Kd = 0.0, .Ki = 0.0, .Ts = 20};
-
+void main(void){
 	system_SetState(SYSTEM_INITIALIZE);
 	Config_System();
+	EEPROMConfig();
+	Timer_Init();
 	speed_control_init();
-	pid_Wallfollow_init(pid_param);
-	bluetooth_init(115200);
 	qei_init(20);
+	//wallFollow_init();
+	HostCommInit();
+
 	buzzer_init();
 	BattSense_init();
 	LED_Display_init();
+	Switch_init();
 	Button_init();
 	IRDetector_init();
-	pid_init();
 
-	ButtonRegisterCallback(BUTTON_LEFT, &ButtonHandler);
+
+	ButtonRegisterCallback(BUTTON_LEFT, &ButtonLeftHandler);
 	ButtonRegisterCallback(BUTTON_RIGHT, &ButtonRightHandler);
 
 //	buzzer_on(2000, 500);
@@ -138,7 +167,10 @@ void main(void)
 //	bluetooth_print("AT+NAME=NHH\r\n");
 //	bluetooth_print("AT+PSWD=3393\r\n");
 //	bluetooth_print("AT+UART=115200,0,0\r\n");
-//	pid_Wallfollow_set_follow(WALL_FOLLOW_RIGHT);
+
+	pid_Wallfollow_set_follow(WALL_FOLLOW_RIGHT);
+	qei_setPosLeft(0);
+	qei_setPosRight(0);
 
 	while (1)
 	{

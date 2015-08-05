@@ -1,13 +1,8 @@
-/**
- *	Raise your ARM 2015 sample code http://raiseyourarm.com/
- *	Author: Pay it forward club
- *	http://www.payitforward.edu.vn
- *  version 0.0.1
- */
-
-/**
- * @file	parameter.h
- * @brief	eeprom parameter
+/*
+ * parameters.h
+ *
+ *  Created on: Jul 9, 2015
+ *      Author: NHH
  */
 
 #ifndef EEPROM_PARAMETERS_H_

@@ -48,6 +48,7 @@ typedef enum
 	SYSTEM_INITIALIZE,
 	SYSTEM_CALIB_SENSOR,
 	SYSTEM_SAVE_CALIB_SENSOR,
+	SYSTEM_GET_MOTOR_MODEL,
 	SYSTEM_ESTIMATE_MOTOR_MODEL,
 	SYSTEM_SAVE_MOTOR_MODEL,
 	SYSTEM_WAIT_TO_RUN,
@@ -62,5 +63,6 @@ extern void LED_Display_init(void);
 extern SYSTEM_STATE system_GetState(void);
 extern void system_SetState(SYSTEM_STATE SysState);
 extern void system_Process_System_State(void);
+extern uint32_t u32_UsrSystemClockGet();
 
 #endif /* SYSTEMCONFIG_H_ */
