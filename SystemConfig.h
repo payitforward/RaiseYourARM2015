@@ -63,5 +63,4 @@ extern SYSTEM_STATE system_GetState(void);
 extern void system_SetState(SYSTEM_STATE SysState);
 extern void system_Process_System_State(void);
 
-
 #endif /* SYSTEMCONFIG_H_ */

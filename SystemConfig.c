@@ -19,7 +19,13 @@ static void system_SystickConfig(uint32_t ui32_msInterval);
 //* Private variables -------------------------------------------------------*/
 static SYSTEM_STATE e_SystemState = SYSTEM_POWER_UP;
 static uint32_t ms_Tickcount = 0;
+static uint32_t systemClock = 80000000;
+uint32_t u32_UsrSystemClockGet();
 
+uint32_t u32_UsrSystemClockGet()
+{
+	return systemClock;
+}
 void Config_System(void)
 {
 	ROM_FPUEnable();
