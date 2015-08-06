@@ -23,6 +23,7 @@ static WALL_FOLLOW_SELECT e_wall_follow_select = WALL_FOLLOW_NONE;
 static bool ControlFlag = false;
 static uint32_t ui32_msLoop = 0;
 static TIMER_ID pid_TimerID = INVALID_TIMER_ID;
+PID_PARAMETERS pidWallParam = {.Kp=1.0 , .Kd=0.001, .Ki=0.001, .Ts=20};
 
 /**
  * @brief Init Wall follow controller
@@ -30,8 +31,6 @@ static TIMER_ID pid_TimerID = INVALID_TIMER_ID;
  */
 void pid_Wallfollow_init(PID_PARAMETERS pid_param)
 {
-	pid_init();
-	pid_set_parameters(pid_param);
 //	if (pid_TimerID != 0xff)
 //	{
 //		TIMER_UnregisterEvent(pid_TimerID);
@@ -66,7 +65,7 @@ static bool pid_wallfollow(float delta_IR_left, float delta_IR_right, float aver
 			return false;
 	}
 
-	u = pid_process(error);
+	u = pid_process(&pidWallParam,error);
 	set_speed[0] = averageSpeed + (int32_t)(u / 2);
 	set_speed[1] = averageSpeed - (int32_t)(u / 2);
 
