@@ -21,8 +21,25 @@ typedef enum
 	WALL_FOLLOW_BOTH
 } WALL_FOLLOW_SELECT;
 
+typedef enum{
+	TURN_LEFT,
+	TURN_RIGHT,
+	TURN_BACK,
+	FORWARD,
+	BACKWARD,
+	SIMPLE_FORWARD
+}MOVE;
+
+typedef enum{
+	UP_DIR=0,
+	RIGHT_DIR=1,
+	DOWN_DIR=2,
+	LEFT_DIR=3
+}DIRECTION;
+
 extern void pid_Wallfollow_init(PID_PARAMETERS pid_param);
 extern void pid_Wallfollow_process(void);
 extern void pid_Wallfollow_set_follow(WALL_FOLLOW_SELECT follow_sel);
+bool move(int posLeft,int posRight,int velLeftMax, int velRightMax);
 
 #endif /* WALLFOLLOW_WALLFOLLOW_H_ */
