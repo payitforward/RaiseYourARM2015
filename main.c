@@ -143,7 +143,7 @@ void main(void){
 	Timer_Init();
 	speed_control_init();
 	qei_init(20);
-	//wallFollow_init();
+	wallFollow_init();
 	HostCommInit();
 
 	buzzer_init();
