@@ -4,6 +4,8 @@
  *  Created on: Jul 4, 2015
  *      Author: NHH
  */
+#define USE_TIMER1
+
 #include "../include.h"
 #include "IR.h"
 
@@ -18,6 +20,8 @@ static void ir_Stoptimeout(void);
 static TIMER_ID ir_Runtimeout(TIMER_CALLBACK_FUNC TimeoutCallback, uint32_t msTime);
 
 static TIMER_ID ir_TimerID = INVALID_TIMER_ID;
+
+static int i=0;
 
 void IRDetector_init(void)
 {
@@ -37,10 +41,21 @@ void IRDetector_init(void)
  	ADCIntRegister(ADC0_BASE, 2, &IR_Detector_ISR);
  	ROM_ADCIntEnable(ADC0_BASE, 2);
 
-
+#ifdef USE_TIMER1
+ 	SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);
+	TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
+	TimerLoadSet(TIMER1_BASE, TIMER_A, SysCtlClockGet() / 1000);	//Interval: 1ms
+	TimerIntRegister(TIMER1_BASE, TIMER_A, &IR_Timer_Timeout);
+	IntEnable(INT_TIMER1A);
+	TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
+	TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
+	TimerEnable(TIMER1_BASE, TIMER_A);
+#endif
  	ADC_Step = 0;
  	TURN_ON_IRD1();
+#ifndef USE_TIMER1
  	ir_Runtimeout(&IR_Timer_Timeout, 1);
+#endif
 }
 
 static void IR_Detector_ISR(void)
@@ -85,8 +100,13 @@ static void IR_Detector_ISR(void)
 		case 7:
 			IR_ResultTmp[3] = ADCResult;
 			TURN_OFF_IRD4();
+//			i++;
+//			if (i==10)
+//			{
+//				i=0;
+//				LED1_TOGGLE();
+//			}
 			break;
-
 
 		default:
 			//Code should never reach this statement
@@ -95,11 +115,16 @@ static void IR_Detector_ISR(void)
 
 			break;
 	}
- 	ir_Runtimeout(&IR_Timer_Timeout, 1);
+#ifndef USE_TIMER1
+	ir_Runtimeout(&IR_Timer_Timeout, 1);
+#endif
 }
 
 static void IR_Timer_Timeout(void)
 {
+#ifdef USE_TIMER1
+	TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
+#endif
 	ir_TimerID = INVALID_TIMER_ID;
 	switch (ADC_Step)
 	{
